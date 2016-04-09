@@ -7,7 +7,7 @@ import logging
 # Connection Information
 LOG_LEVEL = logging.ERROR
 LOG_FILE_NAME = '{}.log'.format(time.strftime("%Y%m%d"))
-ACCDB_CONN_INFO = r"Driver={Microsoft Access Driver (*.mdb, *.accdb)};Dbq=C:\\_Dev\\PoiToPg\\display.accdb;"
+ACCDB_CONN_INFO = r"Driver={Microsoft Access Driver (*.mdb, *.accdb)};Dbq=C:\\_Dev\\PoiToPg\\poi.accdb;"
 
 PG_CONN_INFO = r"dbname='ngii' user='postgres' host='localhost' password='postgres'"
 ERR_SQL_FILENAME = "ERR_SQL_{}.sql".format(time.strftime("%Y%m%d"))
@@ -23,8 +23,9 @@ def postgres_escape_string(s):
         raise TypeError("%r must be a str or unicode" % (s, ))
     escaped = repr(s)
     if isinstance(s, unicode):
-        assert escaped[:1] == 'u'
-        escaped = escaped[1:]
+        # assert escaped[:1] == 'u'
+        # escaped = escaped[1:]
+        escaped = repr(s.encode("UTF-8")) # Collect UTF-8 problum
     if escaped[:1] == '"':
         escaped = escaped.replace("'", "\\'")
     elif escaped[:1] != "'":
@@ -166,7 +167,7 @@ for tableName in tableNames:
             with open(ERR_SQL_FILENAME, 'a') as f:
                 f.write(u"{};\n".format(sql))
             logging.error(e.message)
-        #if cnt >= 10000: break
+        # if cnt >= 10000: break
 
     logging.info(u"[Table {}] Total row:{}, Error row:{}".format(tableName, cnt, err_cnt))
     print(u"[Table {}] Total row:{}, Error row:{}".format(tableName, cnt, err_cnt))

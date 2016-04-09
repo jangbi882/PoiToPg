@@ -7,9 +7,9 @@ import logging
 # Connection Information
 LOG_LEVEL = logging.ERROR
 LOG_FILE_NAME = '{}.log'.format(time.strftime("%Y%m%d"))
-ACCDB_CONN_INFO = r"Driver={Microsoft Access Driver (*.mdb, *.accdb)};Dbq=C:\\_Dev\\PoiToPg\\poi.accdb;"
+ACCDB_CONN_INFO = r"Driver={Microsoft Access Driver (*.mdb, *.accdb)};Dbq=C:\\_Dev\\PoiToPg\\display.accdb;"
 
-PG_CONN_INFO = r"dbname='ngii_test' user='postgres' host='localhost' password='postgres'"
+PG_CONN_INFO = r"dbname='ngii' user='postgres' host='localhost' password='postgres'"
 ERR_SQL_FILENAME = "ERR_SQL_{}.sql".format(time.strftime("%Y%m%d"))
 
 # Create Error SQL Collect file
@@ -71,8 +71,8 @@ while tables is None:
 
 # === Make DDL ===
 for tableName in tableNames:
-    sqlArray = list(["CREATE TABLE"])
-    sqlArray.append('"{}" ('.format(tableName).lower())
+    sqlArray = list([u"CREATE TABLE"])
+    sqlArray.append(u'"{}" ('.format(tableName).lower())
 
     ac_cur = None
     colSqls = None
@@ -92,44 +92,44 @@ for tableName in tableNames:
                 dataType = "double precision"
             colSize = col.column_size
             if dataType != "double precision" and dataType != "integer":
-                colInfo = "{} {}({})".format(colName.lower(), dataType, colSize)
+                colInfo = u"{} {}({})".format(colName.lower(), dataType, colSize)
             else:
-                colInfo = "{} {}".format(colName.lower(), dataType)
+                colInfo = u"{} {}".format(colName.lower(), dataType)
             colSqls.append(colInfo)
     except Exception as e:
         logging.error(e.args[1])
 
     ac_cur.close()
-    sqlArray.append(", ".join(colSqls))
-    sqlArray.append(")")
+    sqlArray.append(u", ".join(colSqls))
+    sqlArray.append(u")")
 
     fullSQL = " ".join(sqlArray)
 
     # Check if PG table exist
     pg_cur = pg_conn.cursor()
     try:
-        pg_cur.execute("select tablename from pg_tables where schemaname = 'public' and tablename = '{}'"
+        pg_cur.execute(u"select tablename from pg_tables where schemaname = 'public' and tablename = '{}'"
                        .format(tableName.lower()))
         result = pg_cur.fetchall()
         if len(result) > 0:
-            pg_cur.execute("DROP TABLE {}".format(tableName.lower()))
+            pg_cur.execute(u"DROP TABLE {}".format(tableName.lower()))
         # Make Table
         logging.info(fullSQL)
         pg_cur.execute(fullSQL)
         pg_conn.commit()
     except Exception as e:
-        logging.error("[SQL ERROR] {}".format(e.message))
+        logging.error(u"[SQL ERROR] {}".format(e.message))
     pg_cur.close()
 
 # === Insert data ===
 for tableName in tableNames:
-    logging.info("### Processing table {}".format(tableName))
-    print("### Processing table {}".format(tableName))
+    logging.info(u"### Processing table {}".format(tableName))
+    print(u"### Processing table {}".format(tableName))
 
     ac_cur = ac_conn.cursor()
     pg_cur = pg_conn.cursor()
 
-    ac_sql = "SELECT * FROM {}".format(tableName)
+    ac_sql = u"SELECT * FROM {}".format(tableName)
     ac_cur.execute(ac_sql)
 
     cnt = 0
@@ -141,7 +141,7 @@ for tableName in tableNames:
 
         cnt += 1
         if cnt % 10000 == 0:
-            print "{}...".format(cnt),
+            print u"{}...".format(cnt),
         if cnt % 100000 == 0:
             print
 
@@ -164,12 +164,12 @@ for tableName in tableNames:
             pg_conn.commit()
             logging.info(sql)
             with open(ERR_SQL_FILENAME, 'a') as f:
-                f.write("{};\n".format(sql))
+                f.write(u"{};\n".format(sql))
             logging.error(e.message)
-        if cnt >= 10000: break
+        #if cnt >= 10000: break
 
-    logging.info("[Table {}] Total row:{}, Error row:{}".format(tableName, cnt, err_cnt))
-    print("[Table {}] Total row:{}, Error row:{}".format(tableName, cnt, err_cnt))
+    logging.info(u"[Table {}] Total row:{}, Error row:{}".format(tableName, cnt, err_cnt))
+    print(u"[Table {}] Total row:{}, Error row:{}".format(tableName, cnt, err_cnt))
 
     ac_cur.close()
     pg_cur.close()

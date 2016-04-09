@@ -13,7 +13,7 @@ PG_CONN_INFO = r"dbname='ngii' user='postgres' host='localhost' password='postgr
 ERR_SQL_FILENAME = "ERR_SQL_{}.sql".format(time.strftime("%Y%m%d"))
 
 # Create Error SQL Collect file
-logging.basicConfig(filename=LOG_FILE_NAME, level=LOG_LEVEL)
+logging.basicConfig(filename=LOG_FILE_NAME, level=LOG_LEVEL, format='%(asctime)-15s %(message)s')
 open(ERR_SQL_FILENAME, 'w').close()
 
 

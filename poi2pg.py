@@ -25,7 +25,7 @@ def postgres_escape_string(s):
     if isinstance(s, unicode):
         # assert escaped[:1] == 'u'
         # escaped = escaped[1:]
-        escaped = repr(s.encode("UTF-8")) # Collect UTF-8 problum
+        escaped = repr(s.encode("UTF-8"))  # Collect UTF-8 problem
     if escaped[:1] == '"':
         escaped = escaped.replace("'", "\\'")
     elif escaped[:1] != "'":
@@ -36,7 +36,6 @@ def postgres_escape_string(s):
 ac_conn = None
 try:
     pyodbc.lowercase = True
-
     ac_conn = pyodbc.connect(ACCDB_CONN_INFO)
 except Exception as e:
     logging.error("[ERROR] Can't connect to Access file: {}".format(ACCDB_CONN_INFO))

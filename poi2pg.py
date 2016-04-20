@@ -9,7 +9,7 @@ LOG_LEVEL = logging.ERROR
 LOG_FILE_NAME = '{}.log'.format(time.strftime("%Y%m%d"))
 ACCDB_CONN_INFO = r"Driver={Microsoft Access Driver (*.mdb, *.accdb)};Dbq=C:\\_Dev\\PoiToPg\\poi.accdb;"
 
-PG_CONN_INFO = r"dbname='ngii' user='postgres' host='localhost' password='postgres'"
+PG_CONN_INFO = r"dbname='sdmc' user='ngii' host='192.168.10.51' password='0000'"
 ERR_SQL_FILENAME = "ERR_SQL_{}.sql".format(time.strftime("%Y%m%d"))
 
 # Create Error SQL Collect file
@@ -72,7 +72,7 @@ while tables is None:
 # === Make DDL ===
 for tableName in tableNames:
     sqlArray = list([u"CREATE TABLE"])
-    sqlArray.append(u'"{}" ('.format(tableName).lower())
+    sqlArray.append(u'poi.{} ('.format(tableName).lower())
 
     ac_cur = None
     colSqls = None
@@ -108,11 +108,11 @@ for tableName in tableNames:
     # Check if PG table exist
     pg_cur = pg_conn.cursor()
     try:
-        pg_cur.execute(u"select tablename from pg_tables where schemaname = 'public' and tablename = '{}'"
+        pg_cur.execute(u"select tablename from pg_tables where schemaname = 'poi' and tablename = '{}'"
                        .format(tableName.lower()))
         result = pg_cur.fetchall()
         if len(result) > 0:
-            pg_cur.execute(u"DROP TABLE {}".format(tableName.lower()))
+            pg_cur.execute(u"DROP TABLE poi.{}".format(tableName.lower()))
         # Make Table
         logging.info(fullSQL)
         pg_cur.execute(fullSQL)
@@ -154,7 +154,7 @@ for tableName in tableNames:
                 val_arr.append(postgres_escape_string(unicode(col_val)))
 
         val_str = ", ".join(val_arr)
-        sql = u"INSERT INTO {} VALUES ({})".format(tableName.lower(), val_str)
+        sql = u"INSERT INTO poi.{} VALUES ({})".format(tableName.lower(), val_str)
         # print sql
         try:
             pg_cur.execute(sql)
@@ -164,7 +164,7 @@ for tableName in tableNames:
             pg_conn.commit()
             logging.info(sql)
             with open(ERR_SQL_FILENAME, 'a') as f:
-                f.write(u"{};\n".format(sql))
+                f.write(u"{};\n".format(sql).encode("UTF-8"))
             logging.error(e.message)
         # if cnt >= 10000: break
 
